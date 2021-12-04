@@ -33,7 +33,6 @@ var loadTasks = function() {
 
   // loop over object properties
   $.each(tasks, function(list, arr) {
-    console.log(list, arr);
     // then loop over sub-array
     arr.forEach(function(task) {
       createTask(task.text, task.date, list);
@@ -45,8 +44,83 @@ var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
 
+/**
+ * enables the ability to open the date for editing
+ */
+$(".list-group").on("click","span",function(){
+
+  //get current date
+  let date = $(this).text().trim();
+
+  //create new input
+  let dateInput = $("<input>").attr("type","text").addClass("form-control").val(date);
+
+  //swap out elements
+  $(this).replaceWith(dateInput);
+
+  //focus the input
+
+  dateInput.trigger("focus")
+
+});
 
 
+$(".list-group").on("blur","input[type=text]",function(){
+
+  //get current text
+  let date = $(this).val().trim();
+
+  //get the parents ul's id attribute
+  let status = $(this).closest(".list-group").attr("id").replace("list-","")
+
+  //get index
+  let index = $(this).closest(".list-group-item").index();
+
+  tasks[status][index].date = date;
+  saveTasks()
+
+  //recreate span element
+  let dateSpan = $("<span>").addClass("badge badge-primary badge-pill").text(date)
+
+  //replace the textbox
+  $(this).replaceWith(dateSpan);
+
+})
+
+/**
+ * listens for clicks on created tasks names and replaces the text with a textbox for editing
+ * the textbox is then focused
+ */
+$(".list-group").on("click","p",function(){
+  let text = $(this).text().trim()
+
+  let textInput = $("<textarea>").addClass("form-control").val(text)
+  $(this).replaceWith(textInput)
+  textInput.trigger("focus")
+});
+
+/**
+ * updates the localstorage and exits the textbox on blur
+ */
+$(".list-group").on("blur","textarea",function(){
+  console.log($(this))
+  //get the updated task text
+  let text = $(this).val().trim();
+
+  //get the parents ul's id attribute
+  let status = $(this).closest(".list-group").attr("id").replace("list-","")
+
+  //get the tasks's position in the list of other li elements
+  let index = $(this).closest(".list-group-item").index();
+
+  tasks[status][index].text = text;
+  saveTasks()
+
+  let taskP = $("<p>").addClass("m-1").text(text);
+
+  $(this).replaceWith(taskP)
+
+});
 
 // modal was triggered
 $("#task-form-modal").on("show.bs.modal", function() {
