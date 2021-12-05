@@ -44,6 +44,64 @@ var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
 
+$("#trash").droppable({
+  accept: ".card .list-group-item",
+  tolerance: "touch",
+  drop:function(event,ui){
+    ui.draggable.remove();
+  },
+  over:function(event,ui){
+    console.log("over")
+  },
+  out:function(event,ui){
+    console.log("out")
+  }
+})
+
+/**
+ * turns all of the .list-group into draggables and once the list cchanges it updates and saves
+ */
+$(".card .list-group").sortable({
+  connectWith: $(".card .list-group"),
+  scroll: false,
+  tolerance: "pointer",
+  helper: "clone",
+  // activate: function(event) {
+  //   // console.log("activate", this);
+  // },
+  // deactivate: function(event) {
+  //   // console.log("deactivate", this);
+  // },
+  // over: function(event) {
+  //   // console.log("over", event.target);
+  // },
+  // out: function(event) {
+  //   // console.log("out", event.target);
+  // },
+  update: function(event) {
+
+    //array to store the task data in
+    let tempArray = [];
+
+    //loop over children in sortable list
+    $(this).children().each(function(){
+      let text = $(this).find("p").text().trim()
+      let date = $(this).find("span").text().trim()
+
+      console.log(text, date)
+
+      tempArray.push({text:text,date:date});
+    })
+
+    let arrName = $(this).attr("id").replace("list-","")
+
+    tasks[arrName] = tempArray
+    saveTasks()
+
+    console.log(tempArray)
+  }
+})
+
 /**
  * enables the ability to open the date for editing
  */
@@ -64,7 +122,9 @@ $(".list-group").on("click","span",function(){
 
 });
 
-
+/**
+ * On input blur exit editing
+ */
 $(".list-group").on("blur","input[type=text]",function(){
 
   //get current text
