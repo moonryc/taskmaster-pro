@@ -68,7 +68,7 @@ const auditTask = function(taskEl) {
     $(taskEl).addClass("list-group-item-danger")
   }
   else if(Math.abs(moment().diff(time,"days"))<= 2){
-    $(taskEl.addClass("list-group-item-warning"));
+    $(taskEl).addClass("list-group-item-warning");
   }
 
 }
@@ -85,12 +85,13 @@ $("#trash").droppable({
   tolerance: "touch",
   drop:function(event,ui){
     ui.draggable.remove();
+    $(".bottom-trash").removeClass("bottom-trash-activate")
   },
   over:function(event,ui){
-    // console.log("over")
+    $(".bottom-trash").addClass("bottom-trash-activate")
   },
   out:function(event,ui){
-    // console.log("out")
+    $(".bottom-trash").removeClass("bottom-trash-activate")
   }
 })
 
@@ -102,18 +103,20 @@ $(".card .list-group").sortable({
   scroll: false,
   tolerance: "pointer",
   helper: "clone",
-  // activate: function(event) {
-  //   // console.log("activate", this);
-  // },
-  // deactivate: function(event) {
-  //   // console.log("deactivate", this);
-  // },
-  // over: function(event) {
-  //   // console.log("over", event.target);
-  // },
-  // out: function(event) {
-  //   // console.log("out", event.target);
-  // },
+  activate: function(event) {
+    $(this).addClass("dropover")
+    $(".bottom-trash").addClass("bottom-trash-drag")
+  },
+  deactivate: function(event) {
+    $(this).removeClass("dropover")
+    $(".bottom-trash").removeClass("bottom-trash-drag")
+  },
+  over: function(event) {
+    $(event.target).addClass("dropover-active")
+  },
+  out: function(event) {
+    $(event.target).removeClass("dropover-active")
+  },
   update: function(event) {
 
     //array to store the task data in
@@ -239,7 +242,7 @@ $("#task-form-modal").on("shown.bs.modal", function() {
 });
 
 // save button in modal was clicked
-$("#task-form-modal .btn-primary").click(function() {
+$("#task-form-modal .btn-save").on("click",function() {
   // get form values
   var taskText = $("#modalTaskDescription").val();
   var taskDate = $("#modalDueDate").val();
@@ -272,4 +275,8 @@ $("#remove-tasks").on("click", function() {
 // load tasks for the first time
 loadTasks();
 
-
+setInterval(function(){
+  $(".card .list-group-item").each(function(index,el){
+    auditTask(el)
+  })
+},5000)
